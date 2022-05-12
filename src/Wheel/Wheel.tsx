@@ -24,62 +24,127 @@ const items: IWheelItem[] = [
   },
 ];
 
+const debug = false;
+
 export function Wheel() {
-    const startSpeed =10;
+  const startSpeed = 10;
+  const roundDivider = useRef(360);
   const [degree, setDegree] = useState(0);
   const speed = useRef(startSpeed);
-  const step = useMemo(
+  const [winnerId, setWinnerId] = useState<number>();
+  const percentStep = useMemo(
     () => 100 / items.map((x) => x.weight).reduce((a, b) => a + b),
+    []
+  );
+  const degreeStep = useMemo(
+    () => 360 / items.map((x) => x.weight).reduce((a, b) => a + b),
     []
   );
   const style = useMemo(() => {
     const res = `${items.reduce(
       (acc: string, cur: IWheelItem, index, arr): string => {
         return `${acc}, ${cur.color} ${
-          index > 0 ? step * arr[index - 1].weight : "0"
+          index > 0 ? percentStep * arr[index - 1].weight : "0"
         }% ${
-          (index > 0 ? step * arr[index - 1].weight : 0) + step * cur.weight
+          (index > 0 ? percentStep * arr[index - 1].weight : 0) +
+          percentStep * cur.weight
         }%`;
       },
       `from ${degree}deg`
     )}`;
-    console.log(res);
+    if (debug) {
+      console.log(res);
+    }
     return res;
   }, [degree]);
 
   useEffect(() => {
+    if (debug) {
+      console.warn("roundDivider: ", roundDivider);
+    }
+    const winnerPosition = Math.ceil(Math.random() * 360);
+    let winner: number | undefined;
+    items.reduce((acc, cur) => {
+      const section = acc + degreeStep * cur.weight;
+      const res = winnerPosition / section;
+      if (res < 1) {
+        winner = cur.id;
+        return;
+      }
+      return section;
+    }, 0);
+    if (debug) {
+      console.warn("winnerSection: ", winnerPosition);
+      console.warn("winner: ", winner);
+    }
     setInterval(() => {
-      setDegree(cur => {
-          const round = Math.floor(cur / 360);
-          if (speed.current != startSpeed - round) {
-            console.warn('set speed: ', startSpeed - round);
-            speed.current = startSpeed - round; 
+      setDegree((cur) => {
+        const round = Math.floor(cur / roundDivider.current);
+        if (speed.current != startSpeed - round) {
+          if (startSpeed - round != 0) {
+            speed.current = startSpeed - round;
+            if (debug) {
+              console.warn("set speed: ", startSpeed - round);
+            }
+          } else {
+            if (360 - (cur % 360) == winnerPosition) {
+              speed.current = 0;
+                setWinnerId(winner);
+              if (debug) {
+                console.warn("set speed: ", startSpeed - round);
+              }
+            }
           }
-          return cur + speed.current;
-        });
+        }
+        return cur + speed.current;
+      });
     }, 10);
   }, []);
 
   return (
     <div
       style={{
-        width: 300,
-        height: 300,
-        border: `1px solid #ccc`,
-        borderRadius: "50%",
-        position: "relative",
+        display: "grid",
+        placeContent: "center",
         overflow: "hidden",
+        margin: "0",
+        height: "100vh",
+        background: "gainsboro",
       }}
     >
+        <div style={{
+            justifySelf: `center`
+        }}>
+            Winner is {items.find(x => x.id === winnerId)?.color}
+        </div>
       <div
         style={{
-          border: `solid 2em white`,
-          padding: `8em`,
+          border: `20px solid white`,
           borderRadius: `50%`,
-          background: `radial-gradient(white calc(20% - 1px), transparent 20%), 
-            conic-gradient(${style})`,
+          background: "white",
+          position: "relative",
         }}
-      ></div>
+      >
+        <div
+          style={{
+            position: `absolute`,
+            left: `50%`,
+            transform: "translate(-50%, 0px) rotate(45deg)",
+            border: "solid black",
+            borderWidth: "0 3px 3px 0",
+            display: "inline-block",
+            padding: "3px",
+          }}
+        ></div>
+        <div
+          style={{
+            padding: `8em`,
+            borderRadius: `50%`,
+            background: `radial-gradient(white calc(20% - 1px), transparent 20%), 
+            conic-gradient(${style})`,
+          }}
+        ></div>
+      </div>
     </div>
   );
 }
