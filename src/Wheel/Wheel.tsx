@@ -80,18 +80,19 @@ export function Wheel() {
     setInterval(() => {
       setDegree((cur) => {
         const round = Math.floor(cur / roundDivider.current);
-        if (speed.current != startSpeed - round) {
-          if (startSpeed - round != 0) {
-            speed.current = startSpeed - round;
+        const nextSpeed = startSpeed - round;
+        if (speed.current != nextSpeed) {
+          if (nextSpeed > 0) {
+            speed.current = nextSpeed;
             if (debug) {
-              console.warn("set speed: ", startSpeed - round);
+              console.warn("set speed: ", nextSpeed);
             }
           } else {
             if (360 - (cur % 360) == winnerPosition) {
               speed.current = 0;
-                setWinnerId(winner);
+              setWinnerId(winner);
               if (debug) {
-                console.warn("set speed: ", startSpeed - round);
+                console.warn("set speed: ", nextSpeed);
               }
             }
           }
@@ -112,11 +113,13 @@ export function Wheel() {
         background: "gainsboro",
       }}
     >
-        <div style={{
-            justifySelf: `center`
-        }}>
-            Winner is {items.find(x => x.id === winnerId)?.color}
-        </div>
+      <div
+        style={{
+          justifySelf: `center`,
+        }}
+      >
+        Winner is {items.find((x) => x.id === winnerId)?.color}
+      </div>
       <div
         style={{
           border: `20px solid white`,
