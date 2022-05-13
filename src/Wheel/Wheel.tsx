@@ -99,22 +99,27 @@ export function Wheel({ componentRef }: IWheelParams) {
         []
     );
 
-    const startWheel = useCallback((startSpeed: number) => {
-        unmountWheel();
-        if (debug) {
-            console.warn("roundDivider: ", roundDivider);
-        }
-        const winnerPosition = Math.ceil(Math.random() * 360);
+    const getItemIdByPosition = useCallback((position: number) => {
         let winner: number | undefined;
         items.reduce((acc, cur) => {
             const section = acc + degreeStep * cur.weight;
-            const res = winnerPosition / section;
+            const res = position / section;
             if (res < 1) {
                 winner = cur.id;
                 return;
             }
             return section;
         }, 0);
+        return winner;
+    }, []);
+
+    const startWheel = useCallback((startSpeed: number) => {
+        unmountWheel();
+        if (debug) {
+            console.warn("roundDivider: ", roundDivider);
+        }
+        const winnerPosition = Math.ceil(Math.random() * 360);
+        const winner = getItemIdByPosition(winnerPosition);
         if (debug) {
             console.warn("winnerSection: ", winnerPosition);
             console.warn("winner: ", winner);
@@ -124,6 +129,11 @@ export function Wheel({ componentRef }: IWheelParams) {
             setDegree((cur) => {
                 const round = Math.floor(cur / roundDivider);
                 const nextSpeed = startSpeed - round;
+                const curId = getItemIdByPosition(360 - (cur % 360));
+                if (debug) {
+                    console.warn("curId: ", curId);
+                }
+                setWinnerId(curId);
                 if (speed != nextSpeed) {
                     if (nextSpeed > 0) {
                         speed = nextSpeed;
