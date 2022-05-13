@@ -5,5 +5,5 @@ export interface IItem {
 }
 
 export interface IColored {
-    color: 'red' | 'green' | 'blue';
+    color: "red" | "green" | "blue";
 }
