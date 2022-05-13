@@ -1,6 +1,12 @@
-import React from "react";
-import { Wheel } from "./Wheel/Wheel";
+import React, { useRef } from "react";
+import { IWheelRef, Wheel } from "./Wheel/Wheel";
 
 export default function App() {
-    return <Wheel />;
+  const wheelRef = useRef<IWheelRef>(null);
+  return (
+    <>
+      <button onClick={() => wheelRef.current?.start(10)}>Start</button>
+      <Wheel componentRef={wheelRef} />
+    </>
+  );
 }

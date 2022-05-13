@@ -1,4 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IColored, IItem } from "../Models";
 
 interface IWheelItem extends IColored, IItem {}
@@ -26,11 +33,17 @@ const items: IWheelItem[] = [
 
 const debug = false;
 
-export function Wheel() {
-  const startSpeed = 10;
-  const roundDivider = useRef(360);
+export interface IWheelParams {
+  componentRef: React.RefObject<IWheelRef>;
+}
+
+export interface IWheelRef {
+  start: (speed: number) => void;
+}
+
+export function Wheel({ componentRef }: IWheelParams) {
+  const roundDivider = 360;
   const [degree, setDegree] = useState(0);
-  const speed = useRef(startSpeed);
   const [winnerId, setWinnerId] = useState<number>();
   const percentStep = useMemo(
     () => 100 / items.map((x) => x.weight).reduce((a, b) => a + b),
@@ -58,7 +71,31 @@ export function Wheel() {
     return res;
   }, [degree]);
 
-  useEffect(() => {
+  const intervalIdRef = useRef<NodeJS.Timer>();
+
+  useEffect(
+    () => () => {
+      if (intervalIdRef.current) {
+        intervalIdRef.current = undefined;
+      }
+    },
+    []
+  );
+
+  useImperativeHandle(
+    componentRef,
+    () => ({
+      start: (speed: number): void => {
+        startWheel(speed);
+      },
+    }),
+    []
+  );
+
+  const startWheel = useCallback((startSpeed: number) => {
+    if (intervalIdRef.current) {
+      intervalIdRef.current = undefined;
+    }
     if (debug) {
       console.warn("roundDivider: ", roundDivider);
     }
@@ -77,19 +114,20 @@ export function Wheel() {
       console.warn("winnerSection: ", winnerPosition);
       console.warn("winner: ", winner);
     }
-    setInterval(() => {
+    let speed = startSpeed;
+    intervalIdRef.current = setInterval(() => {
       setDegree((cur) => {
-        const round = Math.floor(cur / roundDivider.current);
+        const round = Math.floor(cur / roundDivider);
         const nextSpeed = startSpeed - round;
-        if (speed.current != nextSpeed) {
+        if (speed != nextSpeed) {
           if (nextSpeed > 0) {
-            speed.current = nextSpeed;
+            speed = nextSpeed;
             if (debug) {
               console.warn("set speed: ", nextSpeed);
             }
           } else {
             if (360 - (cur % 360) == winnerPosition) {
-              speed.current = 0;
+              speed = 0;
               setWinnerId(winner);
               if (debug) {
                 console.warn("set speed: ", nextSpeed);
@@ -97,7 +135,7 @@ export function Wheel() {
             }
           }
         }
-        return cur + speed.current;
+        return cur + speed;
       });
     }, 10);
   }, []);
@@ -109,7 +147,8 @@ export function Wheel() {
         placeContent: "center",
         overflow: "hidden",
         margin: "0",
-        height: "100vh",
+        height: "100%",
+        padding: `10em`,
         background: "gainsboro",
       }}
     >
