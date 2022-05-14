@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "repository": "https://github.com/ilnazv/wheel.git",
+  "homepage": "https://ilnazv.github.io/wheel/",
   "author": "Ilnaz Valiev",
   "license": "MIT",
   "scripts": {
@@ -10,7 +11,9 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
-    "start": "webpack serve"
+    "start": "webpack serve",
+    "predeploy": "yarn build:prod",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "react": "^18.1.0",
@@ -21,6 +24,7 @@
     "@types/react-dom": "^18.0.3",
     "@webpack-cli/generators": "^2.4.2",
     "css-loader": "^6.7.1",
+    "gh-pages": "^4.0.0",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.6.0",
     "prettier": "^2.6.2",
