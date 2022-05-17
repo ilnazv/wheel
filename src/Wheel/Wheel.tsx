@@ -13,16 +13,22 @@ const debug = false;
 export interface IWheelParams {
     componentRef: React.RefObject<IWheelRef>;
     items: IWheelItem[];
+    onChange: (itemId?: number) => void;
+    onDone: (itemId?: number) => void;
 }
 
 export interface IWheelRef {
     start: (speed: number) => void;
 }
 
-export function Wheel({ componentRef, items = [] }: IWheelParams) {
+export function Wheel({
+    componentRef,
+    items = [],
+    onChange,
+    onDone,
+}: IWheelParams) {
     const roundDivider = 360;
     const [degree, setDegree] = useState(0);
-    const [winnerId, setWinnerId] = useState<number>();
     const percentStep = useMemo(
         () => 100 / items.map((x) => x.weight).reduce((a, b) => a + b, 0),
         [items]
@@ -56,7 +62,7 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
             intervalIdRef.current = undefined;
         }
         setDegree(0);
-        setWinnerId(undefined);
+        onChange(undefined);
     }, []);
 
     useEffect(
@@ -66,9 +72,9 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
         []
     );
 
-    useEffect(() => unmountWheel(), [items]);
+    useEffect(() => {
+        unmountWheel();
 
-    const itemsMap = useMemo(() => {
         const getItemIdByPosition = (position: number): number => {
             let winner: number | undefined;
             items.reduce((acc, cur) => {
@@ -82,17 +88,21 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
             }, 0);
             return winner!;
         };
-        return Array.from(Array(360).keys()).map(getItemIdByPosition);
+        itemsMap.current = Array.from(Array(360).keys()).map(
+            getItemIdByPosition
+        );
     }, [items]);
+
+    const itemsMap = useRef<number[]>([]);
 
     useImperativeHandle(
         componentRef,
         () => ({
             start: (speed: number): void => {
-                startWheel(speed, itemsMap);
+                startWheel(speed, itemsMap.current);
             },
         }),
-        [componentRef, itemsMap]
+        [componentRef]
     );
 
     const startWheel = useCallback((startSpeed: number, itemsMap: number[]) => {
@@ -115,7 +125,7 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
                 if (debug) {
                     console.warn('curId: ', curId);
                 }
-                setWinnerId(curId);
+                onChange(curId);
                 if (speed != nextSpeed) {
                     if (nextSpeed > 0) {
                         speed = nextSpeed;
@@ -125,7 +135,8 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
                     } else {
                         if (360 - (cur % 360) == winnerPosition) {
                             speed = 0;
-                            setWinnerId(winner);
+                            onChange(winner);
+                            onDone(winner);
                             clearInterval(intervalIdRef.current);
                             intervalIdRef.current = undefined;
                             if (debug) {
@@ -151,13 +162,6 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
                 background: 'gainsboro',
             }}
         >
-            <div
-                style={{
-                    justifySelf: `center`,
-                }}
-            >
-                Winner is {items.find((x) => x.id === winnerId)?.color}
-            </div>
             <div
                 style={{
                     border: `20px solid white`,
