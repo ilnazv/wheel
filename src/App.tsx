@@ -14,15 +14,14 @@ export default function App() {
     }, []);
 
     const onWheelDone = useCallback((itemId?: number) => {
-        console.error('done: ', itemId);
+        console.log('done: ', itemId);
     }, []);
 
     return (
         <>
             <ItemsInput
-                onChange={(_items) => {
-                    console.log('items: ', _items);
-                    setItems(_items);
+                onChange={(val) => {
+                    setItems(val);
                 }}
             />
             <div
