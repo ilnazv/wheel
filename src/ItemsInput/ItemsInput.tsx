@@ -66,6 +66,7 @@ export function ItemsInput({ onChange }: IItemsInputProps): JSX.Element {
                 <input
                     type="number"
                     value={item.weight}
+                    min={1}
                     onChange={(ev) => {
                         setItems((cur) => {
                             cur.find((x) => x.id === item.id)!.weight =

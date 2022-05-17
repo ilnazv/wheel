@@ -19,11 +19,6 @@ export default function App() {
 
     return (
         <>
-            <ItemsInput
-                onChange={(val) => {
-                    setItems(val);
-                }}
-            />
             <div
                 style={{
                     justifySelf: `center`,
@@ -57,6 +52,11 @@ export default function App() {
                     SPIN
                 </button>
             </div>
+            <ItemsInput
+                onChange={(val) => {
+                    setItems(val);
+                }}
+            />
         </>
     );
 }
