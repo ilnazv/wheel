@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { IWheelItem } from '../Models';
+import { CSS_COLOR_NAMES } from '../Constants';
+import { Color, IWheelItem } from '../Models';
 
 interface IItemsInputProps {
     onChange: (items: IWheelItem[]) => void;
@@ -10,21 +11,21 @@ const defaultItems: IWheelItem[] = [
         id: 0,
         title: 'item 1',
         weight: 1,
-        color: 'blue',
+        color: 'Blue',
         selected: true,
     },
     {
         id: 1,
         title: 'item 2',
         weight: 2,
-        color: 'green',
+        color: 'Green',
         selected: true,
     },
     {
         id: 2,
         title: 'item 3',
         weight: 3,
-        color: 'red',
+        color: 'Red',
         selected: true,
     },
 ];
@@ -50,11 +51,50 @@ export function ItemsInput({ onChange }: IItemsInputProps): JSX.Element {
                         });
                     }}
                 ></input>
-                <span>{item.title}</span> - <span>{item.weight}</span> -{' '}
-                <span>{item.color}</span>
+                <input
+                    type="text"
+                    value={item.title}
+                    onChange={(ev) => {
+                        setItems((cur) => {
+                            cur.find((x) => x.id === item.id)!.title =
+                                ev.target.value;
+                            return [...cur];
+                        });
+                    }}
+                ></input>
+                {' - '}
+                <input
+                    type="number"
+                    value={item.weight}
+                    onChange={(ev) => {
+                        setItems((cur) => {
+                            cur.find((x) => x.id === item.id)!.weight =
+                                ev.target.valueAsNumber;
+                            return [...cur];
+                        });
+                    }}
+                ></input>
+                {' - '}
+                <input
+                    type="text"
+                    value={item.color}
+                    onChange={(ev) => {
+                        setItems((cur) => {
+                            cur.find((x) => x.id === item.id)!.color = ev.target
+                                .value as Color;
+                            return [...cur];
+                        });
+                    }}
+                ></input>
             </span>
         );
     }, []);
+
+    const getRandomColor = useCallback(
+        () =>
+            CSS_COLOR_NAMES[Math.floor(Math.random() * CSS_COLOR_NAMES.length)],
+        []
+    );
 
     return (
         <div
@@ -64,6 +104,25 @@ export function ItemsInput({ onChange }: IItemsInputProps): JSX.Element {
             }}
         >
             {items.map(itemInput)}
+            <button
+                onClick={() =>
+                    setItems((cur) => {
+                        const color = getRandomColor();
+                        return [
+                            ...cur,
+                            {
+                                id: Math.max(...cur.map((x) => x.id)) + 1,
+                                color,
+                                selected: true,
+                                title: color,
+                                weight: 1,
+                            },
+                        ];
+                    })
+                }
+            >
+                Add item
+            </button>
         </div>
     );
 }

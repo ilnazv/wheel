@@ -32,14 +32,13 @@ export function Wheel({ componentRef, items = [] }: IWheelParams) {
         [items]
     );
     const style = useMemo(() => {
+        let curPercent = 0;
         const res = `${items.reduce(
             (acc: string, cur: IWheelItem, index, arr): string => {
+                curPercent = curPercent + percentStep * cur.weight;
                 return `${acc}, ${cur.color} ${
                     index > 0 ? percentStep * arr[index - 1].weight : '0'
-                }% ${
-                    (index > 0 ? percentStep * arr[index - 1].weight : 0) +
-                    percentStep * cur.weight
-                }%`;
+                }% ${curPercent}%`;
             },
             `from ${degree}deg`
         )}`;
