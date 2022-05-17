@@ -5,5 +5,11 @@ export interface IItem {
 }
 
 export interface IColored {
-    color: "red" | "green" | "blue";
+    color: 'red' | 'green' | 'blue';
+}
+
+export interface IWheelItem extends IColored, IItem, ISelectable {}
+
+export interface ISelectable {
+    selected: boolean;
 }

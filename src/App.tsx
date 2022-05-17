@@ -1,12 +1,23 @@
-import React, { useRef } from "react";
-import { IWheelRef, Wheel } from "./Wheel/Wheel";
+import React, { useRef, useState } from 'react';
+import { IWheelItem } from './Models';
+import { IWheelRef, Wheel } from './Wheel';
+import { ItemsInput } from './ItemsInput';
 
 export default function App() {
     const wheelRef = useRef<IWheelRef>(null);
+
+    const [items, setItems] = useState<IWheelItem[]>([]);
+
     return (
         <>
             <button onClick={() => wheelRef.current?.start(10)}>Start</button>
-            <Wheel componentRef={wheelRef} />
+            <ItemsInput
+                onChange={(_items) => {
+                    console.log('items: ', _items);
+                    setItems(_items);
+                }}
+            />
+            <Wheel componentRef={wheelRef} items={items} />
         </>
     );
 }
