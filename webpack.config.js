@@ -4,6 +4,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { SourceMapDevToolPlugin } = require('webpack');
+const { ModuleFederationPlugin } = require('webpack').container;
+const deps = require('./package.json').dependencies;
 
 const isProduction = process.env.NODE_ENV == 'production';
 
@@ -24,7 +26,26 @@ const config = {
         new HtmlWebpackPlugin({
             template: 'public/index.html',
         }),
-
+        new ModuleFederationPlugin({
+            name: 'wheel',
+            filename: 'remoteEntry.js',
+            exposes: {
+                './App': './src/App',
+            },
+            shared: {
+                ...deps,
+                react: {
+                    singleton: true,
+                    eager: true,
+                    requiredVersion: deps.react,
+                },
+                'react-dom': {
+                    singleton: true,
+                    eager: true,
+                    requiredVersion: deps['react-dom'],
+                },
+            },
+        }),
         // Add your plugins here
         // Learn more about plugins from https://webpack.js.org/configuration/plugins/
     ],
