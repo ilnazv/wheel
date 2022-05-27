@@ -159,7 +159,6 @@ export function Wheel({
                 margin: '0',
                 height: '100%',
                 padding: `10em`,
-                background: 'gainsboro',
             }}
         >
             <div
